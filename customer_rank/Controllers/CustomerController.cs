@@ -1,16 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Text;
 
 namespace customer_rank.Controllers
 {
 
-    [Route("api/[controller]")]
     [ApiController]
     public class CustomerController : ControllerBase
     {
         [HttpPost]
         [Route("/customer/{customerid}/score/{score}")]
-        public decimal UpdateScore(ulong customerid = 44, decimal score = 12)
+        public decimal UpdateScore(ulong customerid, decimal score)
         {
             var c = Data.Customers.FirstOrDefault(t => t.CustomerID == customerid);
 
@@ -28,7 +26,6 @@ namespace customer_rank.Controllers
             }
             else // 已经存在，只是挪动。
             {
-
                 if (c.Score > 0 && c.Score + score > 0) // 一直 为正值
                 {
                     c.Score += score;
@@ -55,9 +52,33 @@ namespace customer_rank.Controllers
                     c.Score += score;
                     Data.Customers.MoveOptimized(c, score);
                 }
-
             }
             return c.Score;
+        }
+
+        [HttpGet]
+        [Route("/leaderboard/{customerid}")]//?high={high}&low={low}
+        public Customer[] leaderboard(ulong customerid, int low, int high)
+        {
+            var i = Data.OutPut.FindIndex(t => t.CustomerID == customerid);
+
+            if (i == -1)
+            {
+                return new Customer[0];
+            }
+
+            if (i - low > 0)
+                return Data.OutPut.Skip(i - low).Take(high + low+1).ToArray();
+            else
+                return Data.OutPut.Take(high + i).ToArray();
+        }
+
+        [HttpGet]
+        [Route("/leaderboard")] //?start={start}&end={end}  start 应该从1 开始
+        public Customer[] leaderboard_range(int start, int end)
+        {
+            var result = Data.OutPut.Skip(start-1).Take(end-start+1).ToArray();
+            return result;
         }
     }
 }

@@ -42,62 +42,6 @@
             return left;
         }
 
-        public static int GetIndex(this List<Customer> list, int l, int r, ulong customerid, decimal score)
-        {
-            if (list.Count() == 0)
-                return 0;
-
-            if (l == r)
-            {
-                if( list[l].CompareTo(new Customer(customerid, score))<0) 
-                    return l+1;
-                else return l;
-            }
-
-            var index = 0; // list.BinarySearch(c,new CustomerCompare());
-            while (l != r)
-            {
-              
-
-                index = (l + r) / 2;
-                if (list[index].Score < score)
-                {
-                    r = index;
-
-                }
-                else if (list[index].Score > score)
-                {
-                    l = index;
-                }
-                else
-                {
-                    if (list[index].CustomerID < customerid)
-                    {
-                        while (index <= list.Count() - 1 && list[index].Score == score && list[index].CustomerID < customerid)
-                        {
-                            index++;
-                        }
-                        break;
-                    }
-                    else
-                    {
-                        while (index > 0 && list[index - 1].Score == score && list[index - 1].CustomerID > customerid)
-                        {
-                            index--;
-                        }
-                        break;
-                    }
-                }
-
-                if (l + 1 == r)
-                {
-                    return r;
-                }
-            }
-
-            return index;
-        }
-
         public static void MoveOptimized(this List<Customer> list, Customer customer, decimal Changed_score)
         {
             var fromIndex = list.FindIndex(t => t.CustomerID == customer.CustomerID);

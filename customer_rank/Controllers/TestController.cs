@@ -12,7 +12,7 @@ namespace customer_rank.Controllers
         [Route("/init")]
         public string init()
         {
-            
+
             Data.Customers.Clear();
             Test.Customers.Clear();
             Data.OutPut.Clear();
@@ -39,41 +39,30 @@ namespace customer_rank.Controllers
             var count = 40000;
             var mid = 1000;
             var score_max = 1000;
-            var d = DateTime.Now;
+
+            var list = new List<(ulong id, decimal score)>();
             for (int i = 0; i < count; i++)
             {
                 var id = (ulong)random.NextInt64(mid);
                 var score = (ulong)random.NextInt64(score_max);
-                Con.UpdateScore(id, score);
+                list.Add(((ulong)random.NextInt64(mid), (decimal)random.NextInt64(score_max)));
             }
-
-            StringBuilder s = new StringBuilder("result adding time cost:" + DateTime.Now.Subtract(d).TotalSeconds);
-            s.AppendLine();
+            var d = DateTime.Now;
+            foreach (var item in list)
+            {
+                Con.UpdateScore(item.id, item.score);
+            }
+            StringBuilder s = new StringBuilder($"result time cost:{DateTime.Now.Subtract(d).TotalSeconds}\n\n");
+    
 
             d = DateTime.Now;
-            clearData();
-            for (int i = 0; i < count; i++)
+            foreach (var item in list)
             {
-                var id = (ulong)random.NextInt64(mid);
-                var score = (ulong)random.NextInt64(score_max);
-                UpdateScore_correct(id, score);
+                UpdateScore_correct(item.id, item.score);
             }
             s.AppendLine("sort time cost:" + DateTime.Now.Subtract(d).TotalSeconds);
 
             Console.WriteLine($"----------");
-            
-            d = DateTime.Now;
-            clearData();
-            for (int i = 0; i < count; i++)
-            {
-                var id = (ulong)random.NextInt64(mid);
-                var score = (ulong)random.NextInt64(score_max);
-                Console.WriteLine($"{id},{score}");
-                Con.UpdateScore(id, score);
-
-                UpdateScore_correct(id, score);
-            }
-            s.AppendLine("comprehensive time cost:" + DateTime.Now.Subtract(d).TotalSeconds);
 
             for (int i = 0; i < Data.Customers.Count(); i++)
             {
@@ -149,7 +138,8 @@ namespace customer_rank.Controllers
             Test.OutPut.Clear();
         }
 
-        private string Getstr(List<Customer> data) {
+        private string Getstr(List<Customer> data)
+        {
             var str = new StringBuilder($"Customer ID       Score      Rank");
             return $"""
                 <table border='1' cellspacing='0' cellpadding='8' style='width:100%;border-collapse:collapse;'>
@@ -165,7 +155,7 @@ namespace customer_rank.Controllers
                             <tr style='border-bottom:1px solid #ddd;'>
                                 <td>{item.CustomerID}</td>
                                 <td>{item.Score}</td>
-                                <td>{i}</td>
+                                <td>{i+1}</td>
                             </tr>
                         """))}
                     </tbody>
