@@ -1,0 +1,6 @@
+@customer_rank_HostAddress = http://localhost:5251
+
+GET {{customer_rank_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
