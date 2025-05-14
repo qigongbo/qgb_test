@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace customer_rank
+﻿namespace customer_rank
 {
     public static class Test
     {
