@@ -9,44 +9,35 @@ namespace customer_rank.Controllers
     {
         CustomerController Con = new CustomerController();
         [HttpPost]
-        [Route("/init")]
-        public string init()
-        {
-
-            Data.Customers.Clear();
-            Test.Customers.Clear();
-            Data.OutPut.Clear();
-            Test.OutPut.Clear();
-
-            //821,541
-            //224,250
-            //761,656
-            Con.UpdateScore(860, 1000);
-            Con.UpdateScore(593, 906);
-            Con.UpdateScore(260, 10);
-
-
-            return "OK";
-        }
-
-        [HttpPost]
         [Route("/test")]
         public string test()
         {
             clearData();
 
+            Con.UpdateScore(860, 1000);
+            Con.UpdateScore(593, 906);
+            Con.UpdateScore(260, 10);
+
+            return "OK";
+        }
+
+        [HttpPost]
+        [Route("/verfiy")]
+        public string verfiy()
+        {
+            clearData();
+
             Random random = new Random();
             var count = 40000;
-            var mid = 1000;
-            var score_max = 1000;
+            var id_max = 1000;
 
             var list = new List<(ulong id, decimal score)>();
             for (int i = 0; i < count; i++)
             {
-                var id = (ulong)random.NextInt64(mid);
-                var score = (ulong)random.NextInt64(score_max);
-                list.Add(((ulong)random.NextInt64(mid), (decimal)random.NextInt64(score_max)));
+                list.Add(((ulong)random.NextInt64(id_max), (decimal)random.NextInt64(-1000,1000)));
             }
+
+
             var d = DateTime.Now;
             foreach (var item in list)
             {
@@ -104,7 +95,7 @@ namespace customer_rank.Controllers
                     var index = Test.OutPut.FindIndex(t => t.CustomerID == customerid);
                     Test.OutPut.RemoveAt(index);
                 }
-
+                // 一直都是 正数，只用增加score; 一直都是负的，也只用刷新score;
                 c.Score += score;
 
             }

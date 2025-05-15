@@ -10,7 +10,7 @@ namespace customer_rank.Controllers
         [Route("/customer/{customerid}/score/{score}")]
         public decimal UpdateScore(ulong customerid, decimal score)
         {
-            var c = Data.Customers.FirstOrDefault(t => t.CustomerID == customerid);
+            var c = Data.Customers.SingleOrDefault(t => t.CustomerID == customerid);
 
             if (c == null)
             {
@@ -26,31 +26,32 @@ namespace customer_rank.Controllers
             }
             else // 已经存在，只是挪动。
             {
-                if (c.Score > 0 && c.Score + score > 0) // 一直 为正值
+                if (c.Score > 0)    // 为正值
                 {
                     c.Score += score;
                     Data.Customers.MoveOptimized(c, score);
-                    Data.OutPut.MoveOptimized(c, score);
-
+                    if (c.Score > 0) // 保持正值
+                    {
+                        Data.OutPut.MoveOptimized(c, score);
+                    }
+                    else             // 变为 hiden
+                    {
+                        var index = Data.OutPut.FindIndex(t => t.CustomerID == customerid);
+                        if (index >= 0)
+                            Data.OutPut.RemoveAt(index);
+                    }
+                    
                 }
-                else if (c.Score <= 0 && c.Score + score > 0) // 变为可视
+                else // 为负值或0
                 {
                     c.Score += score;
                     Data.Customers.MoveOptimized(c, score);
-                    var index = Data.OutPut.FindPosition(c);// Data.Customers.BinarySearch(c,new CustomerCompare());
-                    Data.OutPut.Insert(index, c);
-                }
-                else if (c.Score > 0 && c.Score + score <= 0) // 变为 hiden
-                {
-                    c.Score += score;
-                    Data.Customers.MoveOptimized(c, score);
-                    var index = Test.OutPut.FindIndex(t => t.CustomerID == customerid);
-                    Data.OutPut.RemoveAt(index);
-                }
-                else
-                { // 一直为负值
-                    c.Score += score;
-                    Data.Customers.MoveOptimized(c, score);
+                    if (c.Score > 0) // 变为正值，可见
+                    {
+                        var index = Data.OutPut.FindPosition(c);
+                        Data.OutPut.Insert(index, c);
+                    }
+                    //else  //still keep 负值或0，do nothing. just refresh the Score.
                 }
             }
             return c.Score;
@@ -68,7 +69,7 @@ namespace customer_rank.Controllers
             }
 
             if (i - low > 0)
-                return Data.OutPut.Skip(i - low).Take(high + low+1).ToArray();
+                return Data.OutPut.Skip(i - low).Take(high + low + 1).ToArray();
             else
                 return Data.OutPut.Take(high + i).ToArray();
         }
@@ -77,7 +78,7 @@ namespace customer_rank.Controllers
         [Route("/leaderboard")] //?start={start}&end={end}  start 应该从1 开始
         public Customer[] leaderboard_range(int start, int end)
         {
-            var result = Data.OutPut.Skip(start-1).Take(end-start+1).ToArray();
+            var result = Data.OutPut.Skip(start - 1).Take(end - start + 1).ToArray();
             return result;
         }
     }
