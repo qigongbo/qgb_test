@@ -81,16 +81,16 @@
             }
             else    //score 变小, 索引越大。这是倒排，小的在后。
             {
-                var toIndex = list.FindPosition(0, list.Count() - 1, customer);
+                var toIndex = list.FindPosition(0, list.Count() - 1, customer)-1;
 
-       
+
                 //// 将中间元素依次前移
-                //for (int i = fromIndex; i < toIndex-1; i++)
-                //{
-                //    list[i] = list[i + 1];
-                //}
-                list.Insert(toIndex, customer);
-                list.RemoveAt(fromIndex);
+                for (int i = fromIndex; i < toIndex; i++)
+                {
+                    list[i] = list[i + 1];
+                }
+
+                list[toIndex] = customer; 
             }
 
         }
