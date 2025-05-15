@@ -55,9 +55,9 @@ namespace customer_rank.Controllers
 
             Console.WriteLine($"----------");
 
-            for (int i = 0; i < Data.Customers.Count(); i++)
+            for (int i = 0; i < Test.OutPut.Count(); i++)
             {
-                if (Data.Customers[i].CustomerID != Test.Customers[i].CustomerID)
+                if (Data.OutPut[i].CustomerID != Test.OutPut[i].CustomerID)
                 {
                     throw new Exception("not equal");
                 }
@@ -78,10 +78,10 @@ namespace customer_rank.Controllers
             if (c == null)
             {
                 c = new Customer(customerid, score);
-                Test.Customers.Add(new Customer(customerid, score));
+                Test.Customers.Add(c);
                 if (score > 0)
                 {
-                    Test.OutPut.Add(new Customer(customerid, score));
+                    Test.OutPut.Add(c);
                 }
             }
             else
@@ -97,7 +97,6 @@ namespace customer_rank.Controllers
                 }
                 // 一直都是 正数，只用增加score; 一直都是负的，也只用刷新score;
                 c.Score += score;
-
             }
 
             Test.Customers.Sort();
@@ -110,7 +109,7 @@ namespace customer_rank.Controllers
         public IActionResult Get()
         {
             // 返回HTML内容
-            return Content(Getstr(Data.Customers), "text/html");
+            return Content(Getstr(Data.OutPut), "text/html");
         }
 
         [HttpGet]
@@ -118,7 +117,7 @@ namespace customer_rank.Controllers
         public IActionResult GetTest()
         {
             // 返回HTML内容
-            return Content(Getstr(Test.Customers), "text/html");
+            return Content(Getstr(Test.OutPut), "text/html");
         }
 
         private void clearData()

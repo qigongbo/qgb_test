@@ -1,7 +1,7 @@
 ﻿
 namespace customer_rank
 {
-    public class Customer: IComparable<Customer>
+    public class Customer : IComparable<Customer>
     {
         public Customer(ulong id, decimal score)
         {
@@ -10,6 +10,7 @@ namespace customer_rank
         }
 
         public ulong CustomerID { get; init; }
+        public decimal Score { get; set; }
 
         public int CompareTo(Customer? other)
         {
@@ -31,7 +32,7 @@ namespace customer_rank
             return right < left; // 复用 < 运算符的逻辑
         }
 
-        public decimal Score { get; set; }
+
     }
 
 }

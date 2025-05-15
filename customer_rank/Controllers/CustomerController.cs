@@ -10,49 +10,45 @@ namespace customer_rank.Controllers
         [Route("/customer/{customerid}/score/{score}")]
         public decimal UpdateScore(ulong customerid, decimal score)
         {
-            var c = Data.Customers.SingleOrDefault(t => t.CustomerID == customerid);
+            var c = Data.Customers.GetValueOrDefault(customerid);
 
             if (c == null)
             {
                 c = new Customer(customerid, score);
-                var index = Data.Customers.FindPosition(c);
-                Data.Customers.Insert(index, c);
+                Data.Customers.Add(customerid, c);
 
                 if (score > 0)
                 {
-                    index = Data.OutPut.FindPosition(c);
+                    var index = Data.OutPut.FindPosition(c);
                     Data.OutPut.Insert(index, c);
                 }
             }
-            else // 已经存在，只是挪动。
+            else if(score!=0)// 已经存在，只是挪动。
             {
+                var compare_customer = new Customer(customerid, c.Score+score);
                 if (c.Score > 0)    // 为正值
                 {
-                    c.Score += score;
-                    Data.Customers.MoveOptimized(c, score);
-                    if (c.Score > 0) // 保持正值
+                    if (compare_customer.Score > 0) // 保持正值
                     {
-                        Data.OutPut.MoveOptimized(c, score);
+                        Data.OutPut.MoveOptimized(compare_customer, score);
                     }
                     else             // 变为 hiden
                     {
                         var index = Data.OutPut.FindIndex(t => t.CustomerID == customerid);
-                        if (index >= 0)
-                            Data.OutPut.RemoveAt(index);
+                        Data.OutPut.RemoveAt(index);
                     }
-                    
                 }
                 else // 为负值或0
                 {
-                    c.Score += score;
-                    Data.Customers.MoveOptimized(c, score);
-                    if (c.Score > 0) // 变为正值，可见
+                    if (compare_customer.Score > 0) // 变为正值，可见
                     {
-                        var index = Data.OutPut.FindPosition(c);
-                        Data.OutPut.Insert(index, c);
+                        var index = Data.OutPut.FindPosition(compare_customer);
+                        Data.OutPut.Insert(index, compare_customer);
                     }
-                    //else  //still keep 负值或0，do nothing. just refresh the Score.
+                    //else  //still keep 负值或0，do nothing.  Customers 已经处理过，output 不需处理。
                 }
+                c.Score += score;
+
             }
             return c.Score;
         }
