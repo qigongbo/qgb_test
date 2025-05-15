@@ -9,7 +9,6 @@
     {
         public static List<Customer> OutPut = new List<Customer>();
         public static Dictionary<ulong, Customer> Customers = new Dictionary<ulong, Customer>();
-        public static Dictionary<ulong, Customer> Hiddens = new Dictionary<ulong, Customer>();
 
         /// <summary>
         ///  一个有序数组，要插入一个新元素，返回要插入的位置
@@ -66,7 +65,7 @@
         /// <param name="Changed_score"></param>
         public static void MoveOptimized(this List<Customer> list, Customer customer, decimal Changed_score)
         {
-            var fromIndex = list.FindIndex(t => t.CustomerID == customer.CustomerID);
+            var fromIndex = customer.Rank-1;
 
             if (Changed_score > 0) //score 变大, 索引越小。这是倒排，大的在前。
             {
@@ -75,9 +74,11 @@
                 for (int i = fromIndex; i > toIndex; i--)
                 {
                     list[i] = list[i - 1];
+                    list[i].Rank++;
                 }
                 
                 list[toIndex] = customer; // 放置目标元素
+                customer.Rank = toIndex + 1;
             }
             else    //score 变小, 索引越大。这是倒排，小的在后。
             {

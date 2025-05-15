@@ -12,6 +12,8 @@ namespace customer_rank
         public ulong CustomerID { get; init; }
         public decimal Score { get; set; }
 
+        public int Rank { get; set; }
+
         public int CompareTo(Customer? other)
         {
             if (other.Score == Score)

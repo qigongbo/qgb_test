@@ -19,13 +19,19 @@ namespace customer_rank.Controllers
 
                 if (score > 0)
                 {
-                    var index = Data.OutPut.FindPosition(c);
-                    Data.OutPut.Insert(index, c);
+                    c.Rank = Data.OutPut.FindPosition(c)+1;
+                    Data.OutPut.Insert(c.Rank-1, c);
+
+                    for (int i = c.Rank; i < Data.OutPut.Count; i++) {
+                        Data.OutPut[i].Rank++;
+                    }
                 }
             }
             else if(score!=0)// 已经存在，只是挪动。
             {
                 var compare_customer = new Customer(customerid, c.Score+score);
+                compare_customer.Rank = c.Rank;
+
                 if (c.Score > 0)    // 为正值
                 {
                     if (compare_customer.Score > 0) // 保持正值
