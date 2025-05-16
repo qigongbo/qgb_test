@@ -28,7 +28,7 @@ namespace customer_rank.Controllers
                     }
                 }
             }
-            else if(score!=0)// 已经存在，只是挪动。
+            else if(score!=0)       // 已经存在，只是挪动。
             {
                 if (c.Score > 0)    // 为正值
                 {
@@ -38,7 +38,7 @@ namespace customer_rank.Controllers
                     }
                     else             // 变为 hiden
                     {
-                        var index = Data.OutPut.FindIndex(t => t.CustomerID == customerid);
+                        var index = c.Rank-1;
                         
                         Data.OutPut.RemoveAt(index);
                         for (int i = index; i < Data.OutPut.Count; i++)

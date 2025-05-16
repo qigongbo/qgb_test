@@ -13,9 +13,9 @@
 
 
         public static void Add_positive()
-        { 
-        
-        
+        {
+
+
         }
 
         /// <summary>
@@ -24,12 +24,12 @@
         /// <param name="list"></param>
         /// <param name="customer">插入之后，元素的值不要改变。就是 插入之前就要改变</param>
         /// <returns></returns>
-        public static int FindPosition(this List<Customer> list, Customer customer, decimal change=0)
+        public static int FindPosition(this List<Customer> list, Customer customer, decimal change = 0)
         {
             if (list.Count() == 0)
                 return 0;
 
-            var tmp = change == 0? customer:new Customer(customer.CustomerID, customer.Score + change);
+            var tmp = change == 0 ? customer : new Customer(customer.CustomerID, customer.Score + change);
 
             int left = 0, right = list.Count - 1;
             while (left <= right)
@@ -75,35 +75,32 @@
         /// <param name="Changed_score"></param>
         public static void MoveOptimized(this List<Customer> list, Customer customer, decimal change)
         {
-            var fromIndex = customer.Rank-1;
+            var fromIndex = customer.Rank - 1;
             var tmp = new Customer(customer.CustomerID, customer.Score + change);
+            var toIndex = 0;
             if (change > 0) //score 变大, 索引越小。这是倒排，大的在前。
             {
-                var toIndex = list.FindPosition(0, fromIndex, tmp);
+                toIndex = list.FindPosition(0, fromIndex, tmp);
 
                 for (int i = fromIndex; i > toIndex; i--)
                 {
                     list[i] = list[i - 1];
-                    list[i].Rank=i+1; // ++
+                    list[i].Rank = i + 1; // ++
                 }
-                
-                list[toIndex] = customer; // 放置目标元素
-                list[toIndex].Rank = toIndex + 1;
             }
-            else    //score 变小, 索引越大。这是倒排，小的在后。
+            else           //score 变小, 索引越大。这是倒排，小的在后。
             {
-                var toIndex = list.FindPosition(0, list.Count() - 1, tmp) - 1;
+                toIndex = list.FindPosition(0, list.Count() - 1, tmp) - 1;
 
                 for (int i = fromIndex; i < toIndex; i++)
                 {
                     list[i] = list[i + 1];
                     list[i].Rank = i + 1;
                 }
-
-                list[toIndex] = customer; // 放置目标元素
-                list[toIndex].Rank = toIndex + 1;
             }
 
+            list[toIndex] = customer; // 放置目标元素
+            list[toIndex].Rank = toIndex + 1;
         }
     }
 }

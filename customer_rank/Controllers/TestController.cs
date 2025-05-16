@@ -8,18 +8,6 @@ namespace customer_rank.Controllers
     public class HomeController : ControllerBase
     {
         CustomerController Con = new CustomerController();
-        [HttpPost]
-        [Route("/test")]
-        public string test()
-        {
-            clearData();
-
-            Con.UpdateScore(860, 1000);
-            Con.UpdateScore(593, 906);
-            Con.UpdateScore(260, 10);
-
-            return "OK";
-        }
 
         [HttpPost]
         [Route("/verfiy")]
