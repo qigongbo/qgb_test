@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.VisualBasic;
 
 namespace customer_rank.Controllers
 {
@@ -7,63 +6,69 @@ namespace customer_rank.Controllers
     [ApiController]
     public class CustomerController : ControllerBase
     {
+        private static readonly object _lock = new object();
+
         [HttpPost]
         [Route("/customer/{customerid}/score/{score}")]
         public decimal UpdateScore(ulong customerid, decimal score)
         {
-            var c = Data.All.GetValueOrDefault(customerid);
-            
-            if (c == null)
+            lock (_lock)
             {
-                c = new Customer(customerid, score);
-                Data.All.Add(customerid, c);
+                var c = Data.All.GetValueOrDefault(customerid);
 
-                if (score > 0)
+                if (c == null)
                 {
-                    c.Rank = Data.Customers.FindPosition(c)+1;
-                    Data.Customers.Insert(c.Rank-1, c);
+                    c = new Customer(customerid, score);
+                    Data.All.Add(customerid, c);
 
-                    for (int i = c.Rank; i < Data.Customers.Count; i++) {
-                        Data.Customers[i].Rank++;
-                    }
-                }
-            }
-            else if(score!=0)       // 已经存在，只是挪动。
-            {
-                if (c.Score > 0)    // 为正值
-                {
-                    if (c.Score + score > 0) // 保持正值
+                    if (score > 0)
                     {
-                        Data.Customers.MoveOptimized(c, score);
-                    }
-                    else             // 变为 hiden
-                    {
-                        var index = c.Rank-1;
-                        
-                        Data.Customers.RemoveAt(index);
-                        for (int i = index; i < Data.Customers.Count; i++)
-                        {
-                            Data.Customers[i].Rank--;
-                        }
-                    }
-                }
-                else // 为负值或0
-                {
-                    if (c.Score + score > 0) // 变为正值，可见
-                    {
-                        c.Rank = Data.Customers.FindPosition(c, score) +1;
-                        Data.Customers.Insert(c.Rank-1, c);
-                       
+                        c.Rank = Data.Customers.FindPosition(c) + 1;
+                        Data.Customers.Insert(c.Rank - 1, c);
+
                         for (int i = c.Rank; i < Data.Customers.Count; i++)
                         {
                             Data.Customers[i].Rank++;
                         }
                     }
-                    //else  //still keep 负值或0，do nothing.  All 已经处理过，Customers,不包含这个元素 不需处理。
                 }
-                c.Score = c.Score + score;
+                else if (score != 0)       // 已经存在，只是挪动。
+                {
+                    if (c.Score > 0)    // 为正值
+                    {
+                        if (c.Score + score > 0) // 保持正值
+                        {
+                            Data.Customers.MoveOptimized(c, score);
+                        }
+                        else             // 变为 hiden
+                        {
+                            var index = c.Rank - 1;
+
+                            Data.Customers.RemoveAt(index);
+                            for (int i = index; i < Data.Customers.Count; i++)
+                            {
+                                Data.Customers[i].Rank--;
+                            }
+                        }
+                    }
+                    else // 为负值或0
+                    {
+                        if (c.Score + score > 0) // 变为正值，可见
+                        {
+                            c.Rank = Data.Customers.FindPosition(c, score) + 1;
+                            Data.Customers.Insert(c.Rank - 1, c);
+
+                            for (int i = c.Rank; i < Data.Customers.Count; i++)
+                            {
+                                Data.Customers[i].Rank++;
+                            }
+                        }
+                        //else  //still keep 负值或0，do nothing.  All 已经处理过，Customers,不包含这个元素 不需处理。
+                    }
+                    c.Score = c.Score + score;
+                }
+                return c.Score;
             }
-            return c.Score;
         }
 
         [HttpGet]
@@ -72,7 +77,7 @@ namespace customer_rank.Controllers
         {
             var c = Data.All.GetValueOrDefault(customerid);
 
-            if (c is null || c.Score <=0)
+            if (c is null || c.Score <= 0)
             {
                 return new Customer[0];
             }
