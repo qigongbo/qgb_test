@@ -1,5 +1,3 @@
-## dev branch is more optimized.
-
 ## This is a webapi project with swagger UI.
 
 ## Besides the business interfaces, there are some test interfaces:
