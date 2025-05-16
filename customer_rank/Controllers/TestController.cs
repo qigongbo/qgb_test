@@ -105,7 +105,7 @@ namespace customer_rank.Controllers
         }
 
         [HttpGet()]
-        [Route("/get_data_table")]
+        [Route("/data")]
         public IActionResult Get()
         {
             // 返回HTML内容
@@ -113,7 +113,7 @@ namespace customer_rank.Controllers
         }
 
         [HttpGet]
-        [Route("/get_test_data_table")]
+        [Route("/test")]
         public IActionResult GetTest()
         {
             // 返回HTML内容
@@ -145,7 +145,7 @@ namespace customer_rank.Controllers
                             <tr style='border-bottom:1px solid #ddd;'>
                                 <td>{item.CustomerID}</td>
                                 <td>{item.Score}</td>
-                                <td>{i+1}</td>
+                                <td>{item.Rank}</td>
                             </tr>
                         """))}
                     </tbody>

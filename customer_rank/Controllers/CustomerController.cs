@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualBasic;
 
 namespace customer_rank.Controllers
 {
@@ -11,7 +12,7 @@ namespace customer_rank.Controllers
         public decimal UpdateScore(ulong customerid, decimal score)
         {
             var c = Data.Customers.GetValueOrDefault(customerid);
-
+            
             if (c == null)
             {
                 c = new Customer(customerid, score);
@@ -29,32 +30,38 @@ namespace customer_rank.Controllers
             }
             else if(score!=0)// 已经存在，只是挪动。
             {
-                var compare_customer = new Customer(customerid, c.Score+score);
-                compare_customer.Rank = c.Rank;
-
                 if (c.Score > 0)    // 为正值
                 {
-                    if (compare_customer.Score > 0) // 保持正值
+                    if (c.Score + score > 0) // 保持正值
                     {
-                        Data.OutPut.MoveOptimized(compare_customer, score);
+                        Data.OutPut.MoveOptimized(c, score);
                     }
                     else             // 变为 hiden
                     {
                         var index = Data.OutPut.FindIndex(t => t.CustomerID == customerid);
+                        
                         Data.OutPut.RemoveAt(index);
+                        for (int i = index; i < Data.OutPut.Count; i++)
+                        {
+                            Data.OutPut[i].Rank--;
+                        }
                     }
                 }
                 else // 为负值或0
                 {
-                    if (compare_customer.Score > 0) // 变为正值，可见
+                    if (c.Score + score > 0) // 变为正值，可见
                     {
-                        var index = Data.OutPut.FindPosition(compare_customer);
-                        Data.OutPut.Insert(index, compare_customer);
+                        c.Rank = Data.OutPut.FindPosition(c, score) +1;
+                        Data.OutPut.Insert(c.Rank-1, c);
+                       
+                        for (int i = c.Rank; i < Data.OutPut.Count; i++)
+                        {
+                            Data.OutPut[i].Rank++;
+                        }
                     }
-                    //else  //still keep 负值或0，do nothing.  Customers 已经处理过，output 不需处理。
+                    //else  //still keep 负值或0，do nothing.  Customers 已经处理过，output,不包含这个元素 不需处理。
                 }
-                c.Score += score;
-
+                c.Score = c.Score + score;
             }
             return c.Score;
         }
