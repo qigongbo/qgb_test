@@ -8,14 +8,6 @@ namespace customer_rank
     {
         public static void Main(string[] args)
         {
-            Data.All.Add(12, new Customer(12,333));
-            var s = Data.All.GetValueOrDefault((ulong)12);
-            s.Score++;
-
-            s = new Customer(122, 3332);
-
-            var ss = Data.All.GetValueOrDefault((ulong)12);
-
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
