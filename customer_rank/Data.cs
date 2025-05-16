@@ -2,21 +2,14 @@
 {
     public static class Test
     {
-        public static List<Customer> OutPut = new List<Customer>();
         public static List<Customer> Customers = new List<Customer>();
+        public static List<Customer> All = new List<Customer>();
     }
     public static class Data
     {
-        public static List<Customer> OutPut = new List<Customer>();
-        public static Dictionary<ulong, Customer> Customers = new Dictionary<ulong, Customer>();
+        public static List<Customer> Customers = new List<Customer>();
+        public static Dictionary<ulong, Customer> All = new Dictionary<ulong, Customer>();
 
-
-
-        public static void Add_positive()
-        {
-
-
-        }
 
         /// <summary>
         ///  一个有序数组，要插入一个新元素，返回要插入的位置

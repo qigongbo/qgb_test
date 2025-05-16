@@ -8,13 +8,13 @@ namespace customer_rank
     {
         public static void Main(string[] args)
         {
-            Data.Customers.Add(12, new Customer(12,333));
-            var s = Data.Customers.GetValueOrDefault((ulong)12);
+            Data.All.Add(12, new Customer(12,333));
+            var s = Data.All.GetValueOrDefault((ulong)12);
             s.Score++;
 
             s = new Customer(122, 3332);
 
-            var ss = Data.Customers.GetValueOrDefault((ulong)12);
+            var ss = Data.All.GetValueOrDefault((ulong)12);
 
             var builder = WebApplication.CreateBuilder(args);
 
