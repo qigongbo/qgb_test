@@ -10,4 +10,12 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="E:\test\qgb_test\customer_rank\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="E:\test\qgb_test\customer_rank\.editorconfig" />
+  </ItemGroup>
+
 </Project>

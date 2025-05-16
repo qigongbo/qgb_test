@@ -43,9 +43,9 @@ namespace customer_rank.Controllers
 
             Console.WriteLine($"----------");
 
-            for (int i = 0; i < Test.OutPut.Count(); i++)
+            for (int i = 0; i < Test.Customers.Count(); i++)
             {
-                if (Data.OutPut[i].CustomerID != Test.OutPut[i].CustomerID)
+                if (Data.Customers[i].CustomerID != Test.Customers[i].CustomerID)
                 {
                     throw new Exception("not equal");
                 }
@@ -61,59 +61,59 @@ namespace customer_rank.Controllers
         [Route("/customer_correct/{customerid}/score/{score}")]
         public decimal UpdateScore_correct(ulong customerid, decimal score)
         {
-            var c = Test.Customers.FirstOrDefault(t => t.CustomerID == customerid);
+            var c = Test.All.FirstOrDefault(t => t.CustomerID == customerid);
 
             if (c == null)
             {
                 c = new Customer(customerid, score);
-                Test.Customers.Add(c);
+                Test.All.Add(c);
                 if (score > 0)
                 {
-                    Test.OutPut.Add(c);
+                    Test.Customers.Add(c);
                 }
             }
             else
             {
                 if (c.Score <= 0 && c.Score + score > 0) // 由 小于等于0 变为 大于0
                 {
-                    Test.OutPut.Add(c);
+                    Test.Customers.Add(c);
                 }
                 else if (c.Score > 0 && c.Score + score <= 0) // 由 大于等于0   变为 小于0
                 {
-                    var index = Test.OutPut.FindIndex(t => t.CustomerID == customerid);
-                    Test.OutPut.RemoveAt(index);
+                    var index = Test.Customers.FindIndex(t => t.CustomerID == customerid);
+                    Test.Customers.RemoveAt(index);
                 }
                 // 一直都是 正数，只用增加score; 一直都是负的，也只用刷新score;
                 c.Score += score;
             }
 
+            Test.All.Sort();
             Test.Customers.Sort();
-            Test.OutPut.Sort();
             return c.Score;
         }
 
         [HttpGet()]
-        [Route("/data")]
+        [Route("/showdata")]
         public IActionResult Get()
         {
             // 返回HTML内容
-            return Content(Getstr(Data.OutPut), "text/html");
+            return Content(Getstr(Data.Customers), "text/html");
         }
 
         [HttpGet]
-        [Route("/test")]
+        [Route("/showtest")]
         public IActionResult GetTest()
         {
             // 返回HTML内容
-            return Content(Getstr(Test.OutPut), "text/html");
+            return Content(Getstr(Test.Customers), "text/html");
         }
 
         private void clearData()
         {
+            Data.All.Clear();
+            Test.All.Clear();
             Data.Customers.Clear();
             Test.Customers.Clear();
-            Data.OutPut.Clear();
-            Test.OutPut.Clear();
         }
 
         private string Getstr(List<Customer> data)
