@@ -22,7 +22,7 @@ namespace customer_rank.Controllers
             var list = new List<(ulong id, decimal score)>();
             for (int i = 0; i < count; i++)
             {
-                list.Add(((ulong)random.NextInt64(id_max), (decimal)random.NextInt64(-1000,1000)));
+                list.Add(((ulong)random.NextInt64(id_max), (decimal)random.NextInt64(-1000, 1000)));
             }
 
 
@@ -32,7 +32,7 @@ namespace customer_rank.Controllers
                 Con.UpdateScore(item.id, item.score);
             }
             StringBuilder s = new StringBuilder($"result time cost:{DateTime.Now.Subtract(d).TotalSeconds}\n\n");
-    
+
 
             d = DateTime.Now;
             foreach (var item in list)
@@ -51,7 +51,6 @@ namespace customer_rank.Controllers
                 }
             }
 
-
             return s.ToString();
         }
 
@@ -61,12 +60,12 @@ namespace customer_rank.Controllers
         [Route("/customer_correct/{customerid}/score/{score}")]
         public decimal UpdateScore_correct(ulong customerid, decimal score)
         {
-            var c = Test.All.FirstOrDefault(t => t.CustomerID == customerid);
+            var c = Test.All.GetValueOrDefault(customerid);
 
             if (c == null)
             {
                 c = new Customer(customerid, score);
-                Test.All.Add(c);
+                Test.All.Add(customerid, c);
                 if (score > 0)
                 {
                     Test.Customers.Add(c);
@@ -78,7 +77,7 @@ namespace customer_rank.Controllers
                 {
                     Test.Customers.Add(c);
                 }
-                else if (c.Score > 0 && c.Score + score <= 0) // 由 大于等于0   变为 小于0
+                else if (c.Score > 0 && c.Score + score <= 0) // 由 大于等于0   变为 小于等于0
                 {
                     var index = Test.Customers.FindIndex(t => t.CustomerID == customerid);
                     Test.Customers.RemoveAt(index);
@@ -87,7 +86,6 @@ namespace customer_rank.Controllers
                 c.Score += score;
             }
 
-            Test.All.Sort();
             Test.Customers.Sort();
             return c.Score;
         }

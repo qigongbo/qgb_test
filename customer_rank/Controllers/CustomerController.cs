@@ -6,33 +6,28 @@ namespace customer_rank.Controllers
     [ApiController]
     public class CustomerController : ControllerBase
     {
-        private static readonly object _lock = new object();
+        private static ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim();
 
         [HttpPost]
         [Route("/customer/{customerid}/score/{score}")]
         public decimal UpdateScore(ulong customerid, decimal score)
         {
-            lock (_lock)
+            _rwLock.EnterWriteLock();
+            try
             {
                 var c = Data.All.GetValueOrDefault(customerid);
 
                 if (c == null)
                 {
                     c = new Customer(customerid, score);
-                    Data.All.Add(customerid, c);
+                    Data.All.TryAdd(customerid, c);
 
                     if (score > 0)
                     {
-                        c.Rank = Data.Customers.FindPosition(c) + 1;
-                        Data.Customers.Insert(c.Rank - 1, c);
-
-                        for (int i = c.Rank; i < Data.Customers.Count; i++)
-                        {
-                            Data.Customers[i].Rank++;
-                        }
+                        Data.Insert(c);
                     }
                 }
-                else if (score != 0)       // 已经存在，只是挪动。
+                else if (score != 0)    // 已经存在，只是挪动。
                 {
                     if (c.Score > 0)    // 为正值
                     {
@@ -49,19 +44,15 @@ namespace customer_rank.Controllers
                             {
                                 Data.Customers[i].Rank--;
                             }
+
+                            var s = new List<Customer>(Data.Customers);
                         }
                     }
                     else // 为负值或0
                     {
                         if (c.Score + score > 0) // 变为正值，可见
                         {
-                            c.Rank = Data.Customers.FindPosition(c, score) + 1;
-                            Data.Customers.Insert(c.Rank - 1, c);
-
-                            for (int i = c.Rank; i < Data.Customers.Count; i++)
-                            {
-                                Data.Customers[i].Rank++;
-                            }
+                            Data.Insert(c, score);
                         }
                         //else  //still keep 负值或0，do nothing.  All 已经处理过，Customers,不包含这个元素 不需处理。
                     }
@@ -69,33 +60,51 @@ namespace customer_rank.Controllers
                 }
                 return c.Score;
             }
+            finally
+            {
+                _rwLock.ExitWriteLock();
+            }
         }
 
         [HttpGet]
         [Route("/leaderboard/{customerid}")]//?high={high}&low={low}
-        public Customer[] leaderboard(ulong customerid, int low, int high)
+        public Customer[] GetLeaderboardAroundCustomer(ulong customerid, int low, int high)
         {
-            var c = Data.All.GetValueOrDefault(customerid);
-
-            if (c is null || c.Score <= 0)
+            _rwLock.EnterReadLock();
+            try
             {
-                return new Customer[0];
+                var c = Data.All.GetValueOrDefault(customerid);
+
+                if (c is null || c.Score <= 0)
+                {
+                    return Array.Empty<Customer>();
+                }
+
+                var i = c.Rank - 1;
+                if (i - low > 0)
+                    return Data.Customers.Skip(i - low).Take(high + low + 1).ToArray();
+                else
+                    return Data.Customers.Take(high + i).ToArray();
             }
-
-            var i = c.Rank - 1;
-
-            if (i - low > 0)
-                return Data.Customers.Skip(i - low).Take(high + low + 1).ToArray();
-            else
-                return Data.Customers.Take(high + i).ToArray();
+            finally
+            {
+                _rwLock.ExitReadLock();
+            }
         }
 
         [HttpGet]
         [Route("/leaderboard")] //?start={start}&end={end}  start 应该从1 开始
-        public Customer[] leaderboard_range(int start, int end)
+        public Customer[] GetLeaderboardRange(int start, int end)
         {
-            var result = Data.Customers.Skip(start - 1).Take(end - start + 1).ToArray();
-            return result;
+            _rwLock.EnterReadLock();
+            try
+            {
+                return Data.Customers.Skip(start - 1).Take(end - start + 1).ToArray();
+            }
+            finally
+            {
+                _rwLock.ExitReadLock();
+            }
         }
     }
 }

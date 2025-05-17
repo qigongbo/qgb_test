@@ -1,21 +1,23 @@
-﻿namespace customer_rank
+﻿using System.Collections.Concurrent;
+
+namespace customer_rank
 {
     public static class Test
     {
         public static List<Customer> Customers = new List<Customer>();
-        public static List<Customer> All = new List<Customer>();
+        public static Dictionary<ulong, Customer> All = new Dictionary<ulong, Customer>();
     }
     public static class Data
     {
         public static List<Customer> Customers = new List<Customer>();
         public static Dictionary<ulong, Customer> All = new Dictionary<ulong, Customer>();
 
-
         /// <summary>
         ///  一个有序数组，要插入一个新元素，返回要插入的位置
         /// </summary>
         /// <param name="list"></param>
         /// <param name="customer">插入之后，元素的值不要改变。就是 插入之前就要改变</param>
+        /// <param name="change">change=0, 是刚插入的；update的场景，不会为0</param>
         /// <returns></returns>
         public static int FindPosition(this List<Customer> list, Customer customer, decimal change = 0)
         {
@@ -24,31 +26,19 @@
 
             var tmp = change == 0 ? customer : new Customer(customer.CustomerID, customer.Score + change);
 
-            int left = 0, right = list.Count - 1;
-            while (left <= right)
-            {
-                int mid = (left + right) >> 1; // 位运算代替除法
-                if (list[mid] < tmp)
-                    left = mid + 1;
-                else
-                    right = mid - 1;
-            }
-            return left;
+            return list.FindPosition(0, list.Count - 1, tmp);
         }
 
         /// <summary>
         ///  一个有序数组，要插入一个新元素，返回要插入的位置
         /// </summary>
-        /// <param name="list"></param>
+        /// <param name="list">从调用放来看，这个count 大于0 </param>
         /// <param name="left"></param>
         /// <param name="right"></param>
         /// <param name="customer">插入之后，元素的值不要改变。就是 插入之前就要改变</param>
         /// <returns></returns>
         private static int FindPosition(this List<Customer> list, int left, int right, Customer customer)
         {
-            if (list.Count() == 0)
-                return 0;
-
             while (left <= right)
             {
                 int mid = (left + right) >> 1; // 位运算代替除法
@@ -83,7 +73,7 @@
             }
             else           //score 变小, 索引越大。这是倒排，小的在后。
             {
-                toIndex = list.FindPosition(0, list.Count() - 1, tmp) - 1;
+                toIndex = list.FindPosition(fromIndex, list.Count() - 1, tmp) - 1;
 
                 for (int i = fromIndex; i < toIndex; i++)
                 {
@@ -95,5 +85,18 @@
             list[toIndex] = customer; // 放置目标元素
             list[toIndex].Rank = toIndex + 1;
         }
+
+        public static void Insert(Customer c, decimal score=0) 
+        {
+            c.Rank = Data.Customers.FindPosition(c, score) + 1;
+            Data.Customers.Insert(c.Rank - 1, c);
+
+            for (int i = c.Rank; i < Data.Customers.Count; i++)
+            {
+                Data.Customers[i].Rank++;
+            }
+        }
+
+
     }
 }
